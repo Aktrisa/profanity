@@ -25,7 +25,6 @@
 
 typedef void (*EVENT_FUNC) (void *arg, ...);
 
-void event_init(void);
 void event_listen(char * name, EVENT_FUNC func);
 void event_trigger(const char * const name, void *arg, ...);
 

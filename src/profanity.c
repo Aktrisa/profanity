@@ -595,7 +595,6 @@ _init(const int disable_tls, char *log_level)
     log_info("Initialising contact list");
     contact_list_init();
     muc_init();
-    event_init();
     _register_listeners();
     atexit(_shutdown);
 }
