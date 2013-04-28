@@ -27,6 +27,7 @@
 
 #include "chat_session.h"
 #include "config/preferences.h"
+#include "event.h"
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
@@ -356,7 +357,9 @@ _chat_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             if (delayed) {
                 prof_handle_delayed_message(jid->barejid, message, tv_stamp, FALSE);
             } else {
-                prof_handle_incoming_message(jid->barejid, message, FALSE);
+                gboolean priv = FALSE;
+                event_trigger("xmpp:message:chat:incoming", jid->barejid, message, &priv);
+                //prof_handle_incoming_message(jid->barejid, message, FALSE);
             }
         }
 

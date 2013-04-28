@@ -39,6 +39,7 @@
 #include "common.h"
 #include "contact.h"
 #include "contact_list.h"
+#include "event.h"
 #include "log.h"
 #include "muc.h"
 #include "resource.h"
@@ -51,6 +52,7 @@ static void _handle_idle_time(void);
 static void _init(const int disable_tls, char *log_level);
 static void _shutdown(void);
 static void _create_directories(void);
+static void _register_listeners(void);
 
 static gboolean idle = FALSE;
 
@@ -105,6 +107,22 @@ prof_handle_typing(char *from)
 {
     ui_contact_typing(from);
     ui_current_page_off();
+}
+
+void
+prof_handle_incoming_message2(char *from, char *message, gboolean *priv)
+{
+    ui_incoming_msg(from, message, NULL, *priv);
+    ui_current_page_off();
+
+    if (prefs_get_boolean(PREF_CHLOG) && !(*priv)) {
+        Jid *from_jid = jid_create(from);
+        const char *jid = jabber_get_jid();
+        Jid *jidp = jid_create(jid);
+        chat_log_chat(jidp->barejid, from_jid->barejid, message, PROF_IN_LOG, NULL);
+        jid_destroy(jidp);
+        jid_destroy(from_jid);
+    }
 }
 
 void
@@ -546,6 +564,12 @@ _handle_idle_time()
 }
 
 static void
+_register_listeners(void)
+{
+    event_listen("xmpp:message:chat:incoming", (EVENT_FUNC)prof_handle_incoming_message2);
+}
+
+static void
 _init(const int disable_tls, char *log_level)
 {
     setlocale(LC_ALL, "");
@@ -564,13 +588,15 @@ _init(const int disable_tls, char *log_level)
     accounts_load();
     gchar *theme = prefs_get_string(PREF_THEME);
     theme_init(theme);
-    g_free(theme);
     ui_init();
+    g_free(theme);
     jabber_init(disable_tls);
     cmd_init();
     log_info("Initialising contact list");
     contact_list_init();
     muc_init();
+    event_init();
+    _register_listeners();
     atexit(_shutdown);
 }
 

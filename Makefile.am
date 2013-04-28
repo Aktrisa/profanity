@@ -19,7 +19,8 @@ profanity_SOURCES = src/contact.c src/contact.h src/log.c src/common.c \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
-	src/config/theme.c src/config/theme.h
+	src/config/theme.c src/config/theme.h \
+	src/event.c src/event.h
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
